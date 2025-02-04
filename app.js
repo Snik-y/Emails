@@ -70,13 +70,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const domainList = document.querySelector('#domainList');
-            labels.forEach(domain => {
+            labels.forEach((domain, index) => {
                 const li = document.createElement('li');
                 li.className = 'list-group-item';
-                li.textContent = domain;
+                li.textContent = `${domain} [${counts[index]}]`;
                 domainList.appendChild(li);
             });
-            
+
             // Afficher la liste des adresses
             const addressList = document.querySelector('#addressList');
             const searchInput = document.querySelector('#search');
@@ -100,6 +100,36 @@ document.addEventListener('DOMContentLoaded', function() {
                     address.toLowerCase().includes(searchTerm)
                 );
                 displayAddresses(filteredAddresses);
+            });
+
+            const checkboxesDiv = document.querySelector('#checkboxes');
+            labels.forEach(domain => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = domain;
+                checkbox.id = domain;
+                checkbox.checked = true;
+                checkbox.className = 'domain-checkbox';
+                
+                const label = document.createElement('label');
+                label.htmlFor = domain;
+                label.textContent = domain;
+                label.className = 'mr-3';
+
+                checkboxesDiv.appendChild(checkbox);
+                checkboxesDiv.appendChild(label);
+            });
+
+            document.querySelectorAll('.domain-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const checkedDomains = Array.from(document.querySelectorAll('.domain-checkbox:checked')).map(checkbox => checkbox.value);
+                    const filteredCounts = labels.map(label => domainCount[label]).filter((_, index) => checkedDomains.includes(labels[index]));
+                    const filteredLabels = labels.filter(label => checkedDomains.includes(label));
+
+                    pieChart.data.labels = filteredLabels;
+                    pieChart.data.datasets[0].data = filteredCounts;
+                    pieChart.update();
+                });
             });
         })
 });
